@@ -1,48 +1,76 @@
-#define _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_DEPRECATE  
-#define _CRT_NONSTDC_NO_DEPRECATE
 #include <stdio.h>
 #include <stdlib.h>
 
+struct node {
+    int value;
+    struct node* left;
+    struct node* right;
+};
 
-
-typedef struct node {
-	int value;
-	struct node* left;
-	struct node* right;
-} node;
-
-
-void ll_rotation_test() {
-	node* top = (node*)malloc(sizeof(node));
-	top->value = 10;
-	node* left = (node*)malloc(sizeof(node));
-	left->value = 5;
-	node* leftleft = (node*)malloc(sizeof(node));
-	leftleft->value = 1;
-
-	top->right = NULL;
-	top->left = left;
-	left->right = NULL;
-	left->left = leftleft;
-	leftleft->left = NULL;
-	leftleft->right = NULL;
-
-	node* current = left->right;
-	left->right = top;
-	top->left = current;
-
-	printf("%d %d %d", left->left->value, left->value, left->right->value);
+struct node* create_node(int value) {
+    struct node* newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->value = value;
+    newnode->left = NULL;
+    newnode->right = NULL;
+    return newnode;
 }
 
+struct node* insert_node(struct node* root, int value) {
+    if (root == NULL) {
+        return create_node(value);
+    }
 
+    if (value < root->value) {
+        root->left = insert_node(root->left, value);
+    }
+    else if (value > root->value) {
+        root->right = insert_node(root->right, value);
+    }
+    return root;
+}
 
+struct node* search(struct node* root, int value) {
+    if (root == NULL || root->value == value) {
+        return root;
+    }
+    if (value < root->value) {
+        return search(root->left, value);
+    }
+    return search(root->right, value);
+}
 
+struct node* find_min(struct node* node) {
+    struct node* current = node;
+    while (current && current->left != NULL) {
+        current = current->left;
+    }
+    return current;
+}
 
-int main() {
-
-	ll_rotation_test();
-
-
-	return 0;
+struct node* delete_node(struct node* root, int value) {
+    if (root == NULL) {
+        return root;
+    }
+    if (value < root->value) {
+        root->left = delete_node(root->left, value);
+    }
+    else if (value > root->value) {
+        root->right = delete_node(root->right, value);
+    }
+    else {
+        if (root->left == NULL) {
+            struct node* temp = root->right;
+            free(root);
+            return temp;
+        }
+        else if (root->right == NULL) {
+            struct node* temp = root->left;
+            free(root);
+            return temp;
+        }
+        struct node* temp = find_min(root->right);
+        root->value = temp->value;
+        root->right = delete_node(root->right, temp->value);
+    }
+    return root;
 }
